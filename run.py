@@ -2,26 +2,23 @@ from keras.models import load_model
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing import sequence
 import numpy as np
-model=load_model('in.MODEL')
-#model.summary()
 import pandas as pd
+from tokens import tok
 
-data=pd.read_csv('text_emotion.csv')
-content=data.content.values
-vocab_size=25000
-tk=Tokenizer(num_words=vocab_size)
-tk.fit_on_texts(content)
-
-
-
+obj=tok('text_emotion.csv')
+tk=obj.tokenize(25000)
+model=load_model('one.MODEL')
+print('model loaded')
+dic={0:'negative',1:'neutral',2:'positive'}
 
 
-
-sentence=['I have completed my work']
-
-sentence=tk.texts_to_sequences(sentence)
-sentence = np.array(sequence.pad_sequences(sentence, maxlen=20, padding='post'))
-#print(sentence)
-print(sentence.shape)
-print('ans')
-print(np.argmax(model.predict(sentence)[0]))
+while(1):
+    print('Enter your sentence or enter -1 to break')
+    sentence=[]
+    i=input()
+    if(i=='-1'):
+        break
+    sentence.append(i)
+    sentence=tk.texts_to_sequences(sentence)
+    sentence = np.array(sequence.pad_sequences(sentence, maxlen=20, padding='post'))
+    print(dic[np.argmax(model.predict(sentence)[0])])
