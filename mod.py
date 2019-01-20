@@ -17,3 +17,14 @@ class models:
         model.compile(loss = 'categorical_crossentropy', optimizer='adam',metrics = ['accuracy'])
         print(model.summary())
         return model
+    def arch2(self):
+        lstm_out = 196
+        model = Sequential()
+        model.add(Embedding(self.voc, 128,input_length = self.in_len))
+        model.add(SpatialDropout1D(0.5))
+        model.add(LSTM(lstm_out, dropout=0.5, recurrent_dropout=0.5))
+        model.add(Dense(24,activation='tanh'))
+        model.add(Dense(self.out,activation='softmax'))
+        model.compile(loss = 'binary_crossentropy', optimizer='adam',metrics = ['accuracy'])
+        print(model.summary())
+        return model

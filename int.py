@@ -4,12 +4,13 @@ from keras.utils import to_categorical
 from tokens import tok
 from mod import models
 from keras.preprocessing import sequence
-obj=models(3,25000,20)
-ob=tok('text_emotion.csv')
+import re
+from nltk.corpus import stopwords
+sw=stopwords.words('english')
+obj=models(2,25000,21)
+ob=tok('train.csv')
 voc=25000
 tk=ob.tokenize(voc)
-
-
 def preprocess():
 
     data=pd.read_csv('text_emotion.csv')
@@ -22,10 +23,51 @@ def preprocess():
     y=sentiments
     return X,y
 
+def r(data):
+    #print(data["SentimentText"][3])
+    data["SentimentText"]=data["SentimentText"].str.lower()
+    print("lowercased")
 
-X,y=preprocess()
+    data["SentimentText"]=data["SentimentText"].apply(lambda x:re.sub(r'[@#]\w*','',x))  #removal of hastags
+    print("remove hastags")
+    data["SentimentText"]=data["SentimentText"].apply(lambda x:re.sub("\d+", "", x))
+    data["SentimentText"]=data["SentimentText"].apply(lambda x: re.sub(r'[^\w]', ' ', x)) #removal of punctuations
+    print("removed punctuation")
+
+    data["SentimentText"]=data["SentimentText"].apply(lambda x: re.sub(r'https:\/\/.*','',x)) #removal of urls
+    print("removed urls")
+
+
+    for i in data["SentimentText"]:
+        for j in sw:
+            i=re.sub(j,'',i)
+    print("removed stopwords")
+
+    data["SentimentText"]=data["SentimentText"].apply(lambda x:re.sub(r' +',' ',x))
+    print("extra spaces removed")
+
+
+    for i in data["SentimentText"]:
+        i=i.strip()
+    print("leading and ending spaces removed") ## lstrip,rstrip
+
+    content=data.SentimentText.values
+    sentiment=data.Sentiment.values
+    content=tk.texts_to_sequences(content)
+    X = np.array(sequence.pad_sequences(content, maxlen=20, padding='post'))
+    y=sentiments
+    return X,y
+
+
+
+def pre():
+    data=pd.read_csv('train.csv',encoding='ISO-8859-1',skipinitialspace=True)
+    X,y=r(data)
+    return X,y
+
+X,y=pre()
 y=np.array(y)
-y=to_categorical(y,num_classes=3)
-model=obj.arch1()
-model.fit(X, y, batch_size=256, verbose=1, validation_split=0.2, epochs=20)
-model.save('one.MODEL')
+y=to_categorical(y,num_classes=2)
+model=obj.arch2()
+model.fit(X, y, batch_size=1024, verbose=1, validation_split=0.2, epochs=20)
+model.save('newest.MODEL')
