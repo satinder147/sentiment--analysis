@@ -8,7 +8,8 @@ import re
 from nltk.corpus import stopwords
 sw=stopwords.words('english')
 obj=models(2,25000,21)
-ob=tok('train.csv')
+data=r()
+ob=tok(data)
 voc=25000
 tk=ob.tokenize(voc)
 def preprocess():
@@ -23,7 +24,8 @@ def preprocess():
     y=sentiments
     return X,y
 
-def r(data):
+def r():
+    data=pd.read_csv('train.csv',encoding='ISO-8859-1',skipinitialspace=True)
     #print(data["SentimentText"][3])
     data["SentimentText"]=data["SentimentText"].str.lower()
     print("lowercased")
@@ -50,19 +52,18 @@ def r(data):
     for i in data["SentimentText"]:
         i=i.strip()
     print("leading and ending spaces removed") ## lstrip,rstrip
+    return data
 
+
+
+
+def pre():
+    global data
     content=data.SentimentText.values
     sentiment=data.Sentiment.values
     content=tk.texts_to_sequences(content)
     X = np.array(sequence.pad_sequences(content, maxlen=20, padding='post'))
     y=sentiments
-    return X,y
-
-
-
-def pre():
-    data=pd.read_csv('train.csv',encoding='ISO-8859-1',skipinitialspace=True)
-    X,y=r(data)
     return X,y
 
 X,y=pre()
