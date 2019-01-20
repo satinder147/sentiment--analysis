@@ -6,12 +6,7 @@ from mod import models
 from keras.preprocessing import sequence
 import re
 from nltk.corpus import stopwords
-sw=stopwords.words('english')
-obj=models(2,25000,21)
-data=r()
-ob=tok(data)
-voc=25000
-tk=ob.tokenize(voc)
+
 def preprocess():
 
     data=pd.read_csv('text_emotion.csv')
@@ -65,6 +60,14 @@ def pre():
     X = np.array(sequence.pad_sequences(content, maxlen=20, padding='post'))
     y=sentiments
     return X,y
+
+
+sw=stopwords.words('english')
+obj=models(2,25000,21)
+data=r()
+ob=tok(data)
+voc=25000
+tk=ob.tokenize(voc)
 
 X,y=pre()
 y=np.array(y)
