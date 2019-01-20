@@ -19,8 +19,8 @@ def preprocess():
     y=sentiments
     return X,y
 
-def r():
-    data=pd.read_csv('train.csv',encoding='ISO-8859-1',skipinitialspace=True)
+def r(name):
+    data=pd.read_csv(name,encoding='ISO-8859-1',skipinitialspace=True)
     #print(data["SentimentText"][3])
     data["SentimentText"]=data["SentimentText"].str.lower()
     print("lowercased")
@@ -58,20 +58,20 @@ def pre():
     sentiment=data.Sentiment.values
     content=tk.texts_to_sequences(content)
     X = np.array(sequence.pad_sequences(content, maxlen=20, padding='post'))
-    y=sentiments
+    y=sentiment
     return X,y
 
+if("__name__"=="__main__"):
+	sw=stopwords.words('english')
+	obj=models(2,25000,20)
+	data=r("train.csv")
+	ob=tok(data)
+	voc=25000
+	tk=ob.tokenize(voc)
 
-sw=stopwords.words('english')
-obj=models(2,25000,21)
-data=r()
-ob=tok(data)
-voc=25000
-tk=ob.tokenize(voc)
-
-X,y=pre()
-y=np.array(y)
-y=to_categorical(y,num_classes=2)
-model=obj.arch2()
-model.fit(X, y, batch_size=1024, verbose=1, validation_split=0.2, epochs=20)
+	X,y=pre()
+	y=np.array(y)
+	y=to_categorical(y,num_classes=2)
+	model=obj.arch2()
+	model.fit(X, y, batch_size=1024, verbose=1, validation_split=0.2, epochs=20)
 model.save('newest.MODEL')
