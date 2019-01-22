@@ -20,31 +20,34 @@ def preprocess():
     return X,y
 
 def r(name):
-    data=pd.read_csv(name,encoding='ISO-8859-1',skipinitialspace=True)
-    #print(data["SentimentText"][3])
-    data["SentimentText"]=data["SentimentText"].str.lower()
+    data=pd.read_csv(name,skipinitialspace=True)
+
+    dict={'sadness': 0, 'enthusiasm': 1, 'neutral': 1, 'worry': 0, 'surprise': 2, 'love': 2, 'fun': 2, 'hate': 0, 'happiness': 2, 'boredom': 0, 'relief': 1, 'anger': 0, 'empty': 1}
+    data.sentiment=[dict[i] for i in data.sentiment]
+    #print(data["sentiment"][3])
+    data["content"]=data["content"].str.lower()
     print("lowercased")
 
-    data["SentimentText"]=data["SentimentText"].apply(lambda x:re.sub(r'[@#]\w*','',x))  #removal of hastags
+    data["content"]=data["content"].apply(lambda x:re.sub(r'[@#]\w*','',x))  #removal of hastags
     print("remove hastags")
-    data["SentimentText"]=data["SentimentText"].apply(lambda x:re.sub("\d+", "", x))
-    data["SentimentText"]=data["SentimentText"].apply(lambda x: re.sub(r'[^\w]', ' ', x)) #removal of punctuations
+    data["content"]=data["content"].apply(lambda x:re.sub("\d+", "", x))
+    data["content"]=data["content"].apply(lambda x: re.sub(r'[^\w]', ' ', x)) #removal of punctuations
     print("removed punctuation")
 
-    data["SentimentText"]=data["SentimentText"].apply(lambda x: re.sub(r'https:\/\/.*','',x)) #removal of urls
+    data["content"]=data["content"].apply(lambda x: re.sub(r'https:\/\/.*','',x)) #removal of urls
     print("removed urls")
 
 
-    for i in data["SentimentText"]:
+    for i in data["content"]:
         for j in sw:
             i=re.sub(j,'',i)
     print("removed stopwords")
 
-    data["SentimentText"]=data["SentimentText"].apply(lambda x:re.sub(r' +',' ',x))
+    data["content"]=data["content"].apply(lambda x:re.sub(r' +',' ',x))
     print("extra spaces removed")
 
 
-    for i in data["SentimentText"]:
+    for i in data["content"]:
         i=i.strip()
     print("leading and ending spaces removed") ## lstrip,rstrip
     return data
@@ -54,24 +57,24 @@ def r(name):
 
 def pre():
     global data
-    content=data.SentimentText.values
-    sentiment=data.Sentiment.values
+
+    content=data.content.values
+    sentiment=data.sentiment.values
     content=tk.texts_to_sequences(content)
     X = np.array(sequence.pad_sequences(content, maxlen=20, padding='post'))
     y=sentiment
     return X,y
 
-if("__name__"=="__main__"):
-	sw=stopwords.words('english')
-	obj=models(2,25000,20)
-	data=r("train.csv")
-	ob=tok(data)
-	voc=25000
-	tk=ob.tokenize(voc)
+sw=stopwords.words('english')
+obj=models(3,25000,20)
+data=r("text_emotion.csv")
+ob=tok(data)
+voc=25000
+tk=ob.tokenize(voc)
 
-	X,y=pre()
-	y=np.array(y)
-	y=to_categorical(y,num_classes=2)
-	model=obj.arch2()
-	model.fit(X, y, batch_size=1024, verbose=1, validation_split=0.2, epochs=20)
-model.save('newest.MODEL')
+X,y=pre()
+y=np.array(y)
+y=to_categorical(y,num_classes=3)
+model=obj.arch2()
+model.fit(X, y, batch_size=1024, verbose=1, validation_split=0.2, epochs=20)
+model.save('latest.MODEL')
